@@ -39,13 +39,15 @@ end
 to go
   let sorter sort-on [ xcor ] cars
   print sorter
-  ask cars [
-    let car-infront one-of cars-on patch-ahead 2
-    ifelse car-infront = nobody
-    [ speed-up 1 ]
-    [ slow-down 1 ]
-    if speed > speed-limit [set speed speed-limit]
-    fd speed
+  foreach sorter [ f-car ->
+    ask f-car[
+      let car-infront one-of cars-on patch-ahead 2
+      ifelse car-infront = nobody
+      [ speed-up 1 ]
+      [ slow-down 1 ]
+      if speed > speed-limit [set speed speed-limit]
+      fd speed
+    ]
   ]
   tick
 end

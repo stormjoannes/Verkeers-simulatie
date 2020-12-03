@@ -21,7 +21,7 @@ to make-cars [ amount ]
     set size 1.5
     set shape "car"
     set color red
-    set heading 9
+    set heading 270
     setxy random-xcor 0
     set speed 1
     set speed-limit 5
@@ -39,13 +39,15 @@ end
 to go
   let sorter sort-on [ xcor ] cars
   print sorter
-  ask cars [
-    let car-infront one-of cars-on patch-ahead 2
-    ifelse car-infront = nobody
-    [ speed-up 1 ]
-    [ slow-down 1 ]
-    if speed > speed-limit [set speed speed-limit]
-    fd speed
+  foreach sorter [ f-car ->
+    ask f-car[
+      let car-infront one-of cars-on patch-ahead 2
+      ifelse car-infront = nobody
+      [ speed-up 1 ]
+      [ slow-down 1 ]
+      if speed > speed-limit [set speed speed-limit]
+      fd speed
+    ]
   ]
   tick
 end
@@ -210,12 +212,12 @@ Line -16777216 false 150 105 105 60
 car
 false
 0
-Polygon -7500403 true true 300 180 279 164 261 144 240 135 226 132 213 106 203 84 185 63 159 50 135 50 75 60 0 150 0 165 0 225 300 225 300 180
-Circle -16777216 true false 180 180 90
+Polygon -7500403 true true 0 180 21 164 39 144 60 135 74 132 87 106 97 84 115 63 141 50 165 50 225 60 300 150 300 165 300 225 0 225 0 180
 Circle -16777216 true false 30 180 90
-Polygon -16777216 true false 162 80 132 78 134 135 209 135 194 105 189 96 180 89
-Circle -7500403 true true 47 195 58
+Circle -16777216 true false 180 180 90
+Polygon -16777216 true false 138 80 168 78 166 135 91 135 106 105 111 96 120 89
 Circle -7500403 true true 195 195 58
+Circle -7500403 true true 47 195 58
 
 circle
 false
