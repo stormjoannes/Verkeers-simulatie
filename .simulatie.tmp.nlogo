@@ -21,7 +21,7 @@ to make-cars [ amount ]
     set size 1.5
     set shape "car"
     set color red
-    set heading 90
+    set heading 9
     setxy random-xcor 0
     set speed 1
     set speed-limit 5
@@ -37,7 +37,7 @@ to seperate
 end
 
 to go
-  let sorter sort-o [ xcor ] cars
+  let sorter sort-on [ xcor ] cars
   print sorter
   ask cars [
     let car-infront one-of cars-on patch-ahead 2
