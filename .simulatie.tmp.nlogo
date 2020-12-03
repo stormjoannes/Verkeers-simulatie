@@ -37,7 +37,7 @@ to seperate
 end
 
 to go
-  let sorter sort-on [ xcor ] cars
+  let sorter sort-o [ xcor ] cars
   print sorter
   ask cars [
     let car-infront one-of cars-on patch-ahead 2
