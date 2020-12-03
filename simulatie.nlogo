@@ -1,75 +1,83 @@
 breed [cars car]
 
+globals [average]
+
 cars-own [
   speed
-  speed-limit
+  speed-limit ;; max snelheid
 ]
 
 to setup
   clear-all
   reset-ticks
+  set average 0
   ask patches [ create-road ]
   make-cars 10
 end
 
 to create-road
-  if pycor < 2 and pycor > -2 [ set pcolor white ]
+  if pycor < 2 and pycor > -2 [ set pcolor white ] ;; mooie witte streep als "weg"
 end
 
 to make-cars [ amount ]
   create-cars amount [
     set size 1.5
     set shape "car"
-    set color red
-    set heading 270
+    set heading 270 ;; auto rijden van rechts naar links
     setxy random-xcor 0
     set speed 1
-    set speed-limit 5
+    set speed-limit 5 ;; door de waarde bij de auto te zetten krijgt de weg een maximum snelheid
     seperate
   ]
 end
 
 to seperate
-  if any? other cars in-radius 1.5 [
+  ;; met deze functie geven we elke auto een spot op de weg waar ze minimaal een bepaalde afstand (2 patches link 2 rechts) van andere auto's zitten
+  if any? other cars in-radius 2 [
     fd 1
     seperate
   ]
 end
 
 to go
+  ;; sorteer de auto volgorde
   let sorter sort-on [ xcor ] cars
-  print sorter
+  ;; beweeg in de volgorde van links naar rechts (de meest linker auto is de voorste auto)
   foreach sorter [ f-car ->
     ask f-car[
+      ;; is er een auto 2 patches voor je
       let car-infront one-of cars-on patch-ahead 2
       ifelse car-infront = nobody
+      ;; nee..versnel
       [ speed-up 1 ]
+      ;; ja..versloom
       [ slow-down 1 ]
+      ;; snelheid mag niet hoger dan het snelheidslimiet
       if speed > speed-limit [set speed speed-limit]
       fd speed
     ]
   ]
+  set average mean [speed] of cars
   tick
 end
 
 to slow-down [sub-speed]
+  ;; kans p dat een auto versloomt (treuzelen)..90% kans
   let chance random 100 + 1
   if chance < 90 [
     set speed speed - sub-speed
-    print "i am not speed"
   ]
 end
 
 to speed-up [sub-speed]
   set speed speed + sub-speed
-  print "i am speed"
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-123
-385
-924
-511
+89
+337
+890
+463
 -1
 -1
 13.0
@@ -110,10 +118,10 @@ NIL
 1
 
 BUTTON
-212
-171
-275
-204
+178
+149
+241
+182
 NIL
 go
 T
@@ -126,42 +134,33 @@ NIL
 NIL
 1
 
+MONITOR
+96
+200
+189
+245
+aveage-speed
+average
+17
+1
+11
+
 @#$#@#$#@
 ## WHAT IS IT?
 
-(a general understanding of what the model is trying to show or explain)
+This is a basic traffic simulation to test if the speed limit has any effect on the traffic flow.
 
 ## HOW IT WORKS
 
-(what rules the agents use to create the overall behavior of the model)
+Our agents are the cars. The cars wil keep a certain distance from vehicles in front of them. If they get to close they brake, but if there is no one in front of them, they accelarate.
 
 ## HOW TO USE IT
 
-(how to use the model, including a description of each of the items in the Interface tab)
+You click on setup and after setup you press on GO.
 
 ## THINGS TO NOTICE
 
-(suggested things for the user to notice while running the model)
-
-## THINGS TO TRY
-
-(suggested things for the user to try to do (move sliders, switches, etc.) with the model)
-
-## EXTENDING THE MODEL
-
-(suggested things to add or change in the Code tab to make the model more complicated, detailed, accurate, etc.)
-
-## NETLOGO FEATURES
-
-(interesting or unusual features of NetLogo that the model uses, particularly in the Code tab; or where workarounds were needed for missing features)
-
-## RELATED MODELS
-
-(models in the NetLogo Models Library and elsewhere which are of related interest)
-
-## CREDITS AND REFERENCES
-
-(a reference to the model's URL on the web if it has one, as well as any other necessary credits, citations, and links)
+You will notice cars get closer to cars in front of them, this will lead to the car break breaking. If this repeats itself it will cause a traffic jam. You can also look at the average speed monitor. With this we can see what the average speed of all cars are. With this info, we can make a simple (not 100% accurate) conculsion if the maximum speed has any influence on the traffic flow
 @#$#@#$#@
 default
 true
