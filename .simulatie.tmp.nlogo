@@ -44,15 +44,16 @@ to seperate
   ]
 end
 
-to jam_way_1
+to create_jam_way_1
   ask one-of cars with [number = 1] [
-    set speed speed * 0.5
+    print " hey"
+    set speed 0
   ]
 end
 
-to jam_way_2
+to create_jam_way_2
     ask one-of cars with [number = 2] [
-    set speed speed * 0.5
+    set speed 0
   ]
 end
 
@@ -213,7 +214,7 @@ acceleration
 acceleration
 0.0001
 0.01
-0.0028
+0.0027
 0.0001
 1
 NIL
@@ -274,7 +275,7 @@ BUTTON
 385
 214
 jam way 1
-jam_way_1
+jam-way-1
 NIL
 1
 T
