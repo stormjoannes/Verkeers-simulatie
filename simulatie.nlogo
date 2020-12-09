@@ -7,26 +7,28 @@ cars-own [
   speed-limit ;; max snelheid
 ]
 
-to setup
+to setup-highway
   clear-all
   reset-ticks
   set average 0
-  ask patches [ create-road ]
-  make-cars 10
+  ask patches [ create-highway ]
+  make-cars 10 1
+  make-cars 10 2
 end
 
-to create-road
-  if pycor < 2 and pycor > -2 [ set pcolor white ] ;; mooie witte streep als "weg"
+to create-highway
+  if pycor < 6 and pycor > 2 [ set pcolor white ] ;; mooie witte streep als "weg"
+  if pycor < -2 and pycor > -6 [ set pcolor white ] ;; mooie witte streep als "weg"
 end
 
-to make-cars [ amount ]
+to make-cars [ amount road-num]
   create-cars amount [
     set size 1.5
     set shape "car"
     set heading 270 ;; auto rijden van rechts naar links
-    setxy random-xcor 0
+    ifelse road-num = 1 [ setxy random-xcor 4 ] [ setxy random-xcor -4 ]
     set speed 1
-    set speed-limit 5 ;; door de waarde bij de auto te zetten krijgt de weg een maximum snelheid
+    ifelse road-num = 1 [ set speed-limit 5 ] [ set speed-limit 10 ];; door de waarde bij de auto te zetten krijgt de weg een maximum snelheid
     seperate
   ]
 end
@@ -77,7 +79,7 @@ GRAPHICS-WINDOW
 89
 337
 890
-463
+567
 -1
 -1
 13.0
@@ -92,8 +94,8 @@ GRAPHICS-WINDOW
 1
 -30
 30
--4
-4
+-8
+8
 0
 0
 1
@@ -101,12 +103,12 @@ ticks
 30.0
 
 BUTTON
-96
-148
-159
-181
-NIL
+90
+78
+203
+111
 setup
+setup-highway
 NIL
 1
 T
