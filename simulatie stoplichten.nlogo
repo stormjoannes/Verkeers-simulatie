@@ -1,6 +1,12 @@
+extensions [table array]
 breed [cars car]
 
-globals [average_1 average_2 line_1 line_2 time flow-car-way-1 flow-car-way-2]
+globals [  line_1 line_2 line_3 line_4
+  time
+  flow-car-way-1 flow-car-way-2 flow-car-way-3 flow-car-way-4
+  flow-car-way-5 flow-car-way-6 flow-car-way-7 flow-car-way-8
+  color_1 color_2
+  switch-checked]
 
 cars-own [
   speed
@@ -8,21 +14,42 @@ cars-own [
   number
 ]
 
-to setup-highway
+to setup-crossing-lights
   clear-all
   reset-ticks
-  set average_1 0
-  set average_2 0
-  ask patches [ create-highway ]
+  ask patches [ create-crossing-lights ]
   make-cars amount-cars-way-1 1
   make-cars amount-cars-way-2 2
+  make-cars amount-cars-way-3 3
+  make-cars amount-cars-way-4 4
   set flow-car-way-1 one-of cars with [ number = 1 ]
   set flow-car-way-2 one-of cars with [ number = 2 ]
+  set flow-car-way-3 one-of cars with [ number = 3 ]
+  set flow-car-way-4 one-of cars with [ number = 4 ]
 end
 
-to create-highway
-  if pycor < 2 and pycor > -2 [ set pcolor white ] ;; mooie witte streep als "weg"
-  if pxcor < 2 and pxcor > -2 [ set pcolor white ] ;; mooie witte streep als "weg"
+
+to create-crossing-lights
+  if pycor < 3 and pycor > -3 [ set pcolor white ] ;; mooie witte streep als "weg"
+  if pxcor < 3 and pxcor > -3 [ set pcolor white ] ;; mooie witte streep als "weg"
+  set color_1 red
+  set color_2 red
+  if traffic-lights = True [
+  set_traffic_lights
+  ]
+end
+
+to set_traffic_lights
+  if pycor > 0 and pycor < 3 and pxcor = 3 [ set pcolor color_1 ]
+  if pycor > -3 and pycor < 0 and pxcor = -3 [ set pcolor color_1 ]
+  if pxcor > 0 and pxcor < 3 and pycor = -3 [ set pcolor color_2 ]
+  if pxcor > -3 and pxcor < 0 and pycor = 3 [ set pcolor color_2 ]
+end
+
+to check
+  if ticks mod 100 = 0 [ set color_1 lime set color_2 red]
+  if ticks mod 200 = 0 [ set color_1 red set color_2 lime ]
+  set_traffic_lights
 end
 
 to make-cars [ amount road-num]
@@ -31,14 +58,21 @@ to make-cars [ amount road-num]
     set size 1.5
     ;;set heading 180 ;; auto rijden van rechts naar links
     ask cars [
-      ifelse number = 1 [ set heading 270 set shape "car"] [ set heading 180 set shape "car_down"]
+      if number = 1 [ set heading 270 set shape "car_left"]
+      if number = 2 [ set heading 180 set shape "car_down"]
+      if number = 3 [ set heading 90 set shape "car_right"]
+      if number = 4 [ set heading 0 set shape "car_up"]
     ]
-    ifelse road-num = 1 [ setxy random-xcor 0 ] [ setxy 0 random-ycor  ]
+    if road-num = 1 [ setxy random-xcor 1 ]
+    if road-num = 2 [ setxy -1 random-ycor ]
+    if road-num = 3 [ setxy random-xcor -1 ]
+    if road-num = 4 [ setxy 1 random-ycor ]
     set speed 0
-    ifelse road-num = 1 [ set speed-limit 0.5 ] [ set speed-limit 1 ];; door de waarde bij de auto te zetten krijgt de weg een maximum snelheid
+    set speed-limit 0.7;; door de waarde bij de auto te zetten krijgt de weg een maximum snelheid
     seperate
   ]
 end
+
 
 to seperate
   ;; met deze functie geven we elke auto een spot op de weg waar ze minimaal een bepaalde afstand (2 patches link 2 rechts) van andere auto's zitten
@@ -48,34 +82,34 @@ to seperate
   ]
 end
 
-to line_1_count
+
+to line_crosses_count [ line_check_color ]
   ask flow-car-way-1 [
-    if ([pcolor] of patch-here = gray) [ set line_1 line_1 + 1 ]
+    if ([pcolor] of patch-here = line_check_color) [ set line_1 line_1 + (speed * 1) ]
   ]
-end
-
-to line_2_count
   ask flow-car-way-2 [
-    if ([pcolor] of patch-here = gray) [ set line_2 line_2 + 1 ]
+    if ([pcolor] of patch-here = line_check_color) [ set line_2 line_2 + (speed * 1) ]
+  ]
+  ask flow-car-way-3 [
+    if ([pcolor] of patch-here = line_check_color) [ set line_3 line_3 + (speed * 1) ]
+  ]
+  ask flow-car-way-4 [
+    if ([pcolor] of patch-here = line_check_color) [ set line_4 line_4 + (speed * 1) ]
   ]
 end
 
-to jam_way_1
-  ask one-of cars with [number = 1] [
-    set speed speed * 0.5
-  ]
-end
-
-to jam_way_2
-    ask one-of cars with [number = 2] [
-    set speed speed * 0.5
-  ]
-end
 
 to go
   ;; sorteer de auto volgorde
   let sorter sort-on [ xcor ] cars
+  ifelse traffic-lights = True
+  [ ask patches [check] ]
+  [ set color_1 gray
+    set color_2 gray
+    ask patches [ set_traffic_lights ] ]
   ask cars[
+    ifelse ([pcolor] of patch-ahead 1 = red) [ set speed 0]
+    [
     ;; is er een auto 2 patches voor je
     let car-infront one-of cars-on patch-ahead 2
     ifelse car-infront = nobody
@@ -83,38 +117,105 @@ to go
     [ speed-up ]
     ;; ja..versloom
     [ slow-down car-infront]
+    ]
+
+    if traffic-lights = False [
+        if number = 1 [
+          let stop_patches (patch-set patch -1 0 patch -1 1 patch -1 2 patch -1 3 patch -1 4  patch -1 5 patch -1 6 patch 1 1 patch 1 0 patch 1 -1)
+          let go_patches (patch-set patch -2 -1 patch -1 -1 patch 0 -1 patch 1 -1 patch 2 -1 patch 1 1 patch 0 1 patch -1 1)
+          let look_range [2 4]
+          check-lane number stop_patches go_patches look_range "x" 3
+        ]
+
+        if number = 2 [
+          let stop_patches (patch-set patch -6 -1 patch -5 -1 patch -4 -1 patch -3 -1 patch -2 -1 patch -1 -1  patch 0 -1 patch -1 1 patch 1 1 patch 2 1)
+          let go_patches (patch-set patch 1 2 patch 1 1 patch 1 0 patch 1 -1 patch 1 -2 patch -1 1 patch -1 0 patch -1 -1)
+          let look_range [2 4]
+          check-lane number stop_patches go_patches look_range "y" 4
+        ]
+
+        if number = 3 [
+          let stop_patches (patch-set patch 1 0 patch 1 -1 patch 1 -2 patch 1 -3 patch 1 -4  patch 1 -5 patch 1 -6 patch -1 -1 patch -1 0 patch -1 1)
+          let go_patches (patch-set patch -2 1 patch -1 1 patch 0 1 patch 1 1 patch 2 1 patch -1 -1 patch 0 -1 patch 1 -1)
+          let look_range [-4 -2]
+          check-lane number stop_patches go_patches look_range "x" 1
+        ]
+
+        if number = 4 [
+          let stop_patches (patch-set patch 0 1 patch 1 1 patch 2 1 patch 3 1 patch 4 1 patch 5 1 patch 6 1 patch -1 -1 patch 0 -1 patch 1 -1)
+          let go_patches (patch-set patch -1 2 patch -1 1 patch -1 0 patch -1 -1 patch -1 -2 patch 1 -1 patch 1 0 patch 1 1)
+          let look_range [-4 -2]
+          check-lane number stop_patches go_patches look_range "y" 2
+        ]
+        if ticks mod 50 = 0 [
+          if mean [speed] of cars = 0 [
+            force_lane 4
+          ]
+        ]
+    ]
     ;; snelheid mag niet hoger dan het snelheidslimiet
     if speed > speed-limit [set speed speed-limit]
     if speed < 0 [ set speed 0 ]
     fd speed
   ]
-  set average_1 mean [speed] of cars with [ number = 1]
-  set average_2 mean [speed] of cars with [ number = 2]
-  line_1_count
-  line_2_count
+  ifelse traffic-lights = True
+  [ line_crosses_count lime ]
+  [ line_crosses_count gray ]
   tick
 end
 
-to slow-down [car-infront]
-  ;; kans p dat een auto versloomt (treuzelen)..90% kans
-  let chance random 100 + 1
-  if chance < 90 [
-    set speed [speed] of car-infront - decelaration
+
+to check-lane [road_num stop_patches go_patches look_range axis opposite_side]
+  ifelse axis = "x" [
+    ask cars with [number = road_num] [
+      if xcor >= item 0 look_range and xcor <= item 1 look_range [
+        if any? cars-on stop_patches [
+          if not all? cars-on go_patches [number = opposite_side][
+            set speed 0
+          ]
+        ]
+      ]
+    ]
+  ]
+  [
+    ask cars with [number = road_num] [
+      if ycor >= item 0 look_range and ycor <= item 1 look_range [
+        if any? cars-on stop_patches [
+          if not all? cars-on go_patches [number = opposite_side][
+            set speed 0
+          ]
+        ]
+      ]
+    ]
   ]
 end
 
+
+to force_lane [lanes]
+  let lane random lanes + 1
+  ask cars with [number = lane] [
+     fd 2
+  ]
+end
+
+
+to slow-down [car-infront]
+  set speed [speed] of car-infront - descelaration
+end
+
+
 to speed-up []
-  set speed speed + acceleration
+  set speed speed + accelaration
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-574
-46
-1162
-635
+478
+54
+1158
+735
 -1
 -1
-9.51
+11.02
 1
 10
 1
@@ -135,12 +236,12 @@ ticks
 30.0
 
 BUTTON
-297
-155
-454
-192
+303
+188
+460
+225
 setup
-setup-highway
+setup-crossing-lights
 NIL
 1
 T
@@ -152,10 +253,10 @@ NIL
 1
 
 BUTTON
-363
-197
-456
+369
 230
+462
+263
 play/pause
 go
 T
@@ -169,10 +270,10 @@ NIL
 0
 
 BUTTON
-297
-197
-360
+303
 230
+366
+263
 step
 go
 NIL
@@ -186,12 +287,57 @@ NIL
 0
 
 SLIDER
-378
-271
-550
-304
-decelaration
-decelaration
+298
+274
+470
+307
+amount-cars-way-1
+amount-cars-way-1
+1
+20
+1.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+298
+311
+470
+344
+amount-cars-way-2
+amount-cars-way-2
+1
+20
+1.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+299
+474
+471
+507
+accelaration
+accelaration
+0.0001
+0.03
+0.0049
+0.0001
+1
+NIL
+HORIZONTAL
+
+SLIDER
+299
+513
+471
+546
+descelaration
+descelaration
 0.001
 0.1
 0.055
@@ -201,83 +347,63 @@ NIL
 HORIZONTAL
 
 SLIDER
-201
-272
-373
-305
-acceleration
-acceleration
-0.0001
-0.01
-0.003
-0.0001
+297
+345
+469
+378
+amount-cars-way-3
+amount-cars-way-3
 1
-NIL
-HORIZONTAL
-
-SLIDER
-270
-365
-442
-398
-amount-cars-way-1
-amount-cars-way-1
-1
-50
-12.0
+20
+1.0
 1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-270
-416
-442
-449
-amount-cars-way-2
-amount-cars-way-2
-01
-50
-12.0
+298
+382
+470
+415
+amount-cars-way-4
+amount-cars-way-4
+1
+20
+1.0
 1
 1
 NIL
 HORIZONTAL
 
-BUTTON
-250
-234
-371
-267
-jam way 1
-jam_way_1
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
-0
+PLOT
+1165
+55
+1601
+401
+flow trought traffic lights
+time
+crossings
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -13345367 true "" "plot (line_1 + line_2 + line_3 + line_4) / 4"
 
-BUTTON
-373
-234
-494
-267
- jam way 2
-jam_way_2
-NIL
-1
-T
-OBSERVER
-NIL
-NIL
-NIL
-NIL
+SWITCH
+321
+153
+445
+186
+traffic-lights
+traffic-lights
 0
+1
+-1000
 
 @#$#@#$#@
 ## WHAT IS IT?
@@ -342,16 +468,6 @@ Circle -16777216 true false 135 90 30
 Line -16777216 false 150 105 195 60
 Line -16777216 false 150 105 105 60
 
-car
-false
-0
-Polygon -7500403 true true 0 180 21 164 39 144 60 135 74 132 87 106 97 84 115 63 141 50 165 50 225 60 300 150 300 165 300 225 0 225 0 180
-Circle -16777216 true false 30 180 90
-Circle -16777216 true false 180 180 90
-Polygon -16777216 true false 138 80 168 78 166 135 91 135 106 105 111 96 120 89
-Circle -7500403 true true 195 195 58
-Circle -7500403 true true 47 195 58
-
 car_down
 false
 0
@@ -361,6 +477,36 @@ Circle -16777216 true false 180 30 90
 Polygon -16777216 true false 80 162 78 132 135 134 135 209 105 194 96 189 89 180
 Circle -7500403 true true 195 47 58
 Circle -7500403 true true 195 195 58
+
+car_left
+false
+0
+Polygon -7500403 true true 0 180 21 164 39 144 60 135 74 132 87 106 97 84 115 63 141 50 165 50 225 60 300 150 300 165 300 225 0 225 0 180
+Circle -16777216 true false 30 180 90
+Circle -16777216 true false 180 180 90
+Polygon -16777216 true false 138 80 168 78 166 135 91 135 106 105 111 96 120 89
+Circle -7500403 true true 195 195 58
+Circle -7500403 true true 47 195 58
+
+car_right
+false
+0
+Polygon -7500403 true true 300 180 279 164 261 144 240 135 226 132 213 106 203 84 185 63 159 50 135 50 75 60 0 150 0 165 0 225 300 225 300 180
+Circle -16777216 true false 180 180 90
+Circle -16777216 true false 30 180 90
+Polygon -16777216 true false 162 80 132 78 134 135 209 135 194 105 189 96 180 89
+Circle -7500403 true true 47 195 58
+Circle -7500403 true true 195 195 58
+
+car_up
+false
+0
+Polygon -7500403 true true 180 0 164 21 144 39 135 60 132 74 106 87 84 97 63 115 50 141 50 165 60 225 150 300 165 300 225 300 225 0 180 0
+Circle -16777216 true false 180 30 90
+Circle -16777216 true false 180 180 90
+Polygon -16777216 true false 80 138 78 168 135 166 135 91 105 106 96 111 89 120
+Circle -7500403 true true 195 195 58
+Circle -7500403 true true 195 47 58
 
 circle
 false
