@@ -237,7 +237,7 @@ end
 to force_lane [lanes]
   ; pak een random baan
   let lane random lanes + 1
-  ; forceer de auto(s) op die baan om 2 naar voren te gaan
+  ; forceer de auto(s) op die baan om 2
   ask cars with [number = lane] [
      fd 2
   ]
@@ -245,13 +245,11 @@ end
 
 
 to slow-down [car-infront]
-  ; versloom de auto op basis van de auto voor je en de descelaration
   set speed [speed] of car-infront - descelaration
 end
 
 
 to speed-up []
-  ; versnel de auto op basis van de huidige snelheid en de accelaration
   set speed speed + accelaration
 end
 
