@@ -92,7 +92,9 @@ end
 
 
 to line_crosses_count [ line_check_color ]
-  ; Strom doe jij dit
+  ; per baan berekenen ze voor 1 auto wat de doorstroom is.
+  ; dit word berekend door de al berekende doorstroom plus de huidige speed wanneer de auto over een uitgekozen patch rijd.
+  ; deze patch is als de stoplichten aan staan de lime kleurige patch, anders is het de grijzen.
   ask flow-car-way-1 [
     if ([pcolor] of patch-here = line_check_color) [ set line_1 line_1 + (speed * 1) ]
   ]
@@ -110,15 +112,16 @@ end
 
 to go
   ; Dit is voor de switch, want bij de stoplichten gelden andere regels dan bij een gelijkwaardig kruispunt
-  ; als traffic-lights true
+  ; als de traffic lights is ingeschakeld (True) zorg dat ie checkt welk stoplicht op dat moment rood en groen moeten zijn
   ifelse traffic-lights = True
-  ; laat de stoplichten elke tick kijken of ze moeten veranderen van kleur
-  ; storm doe jij dit
   [ ask patches [check] ]
+  ;;else zet de stoplichten grijs, zodat ze niet meedoen aan het verkeer. Een gelijkwaardig kruispunt
   [ set color_1 gray
     set color_2 gray
+    ;;pas kleuren aan van de patches
     ask patches [ set_traffic_lights ] ]
   ask cars[
+    ;;kijkt of er een rode patch voor zich zit (rode stoplicht), zo ja: stop de auto
     ifelse ([pcolor] of patch-ahead 1 = red) [ set speed 0]
     [
     ;; is er een auto 2 patches voor je
@@ -223,9 +226,7 @@ to check-lane [road_num stop_patches go_patches look_range axis opposite_side]
       ]
     ]
   ]
-
   ; Deze functie is misschien nog steeds verwarrend met de stop en go patches dus hieronder een klein voorbeeld
-
   ; er komt een auto van baan 1 (rechts). hun zouden dus auto's van baan 4 (boven) voorrang moeten verlenen
   ; als er een auto van baan 4 komt aanrijden OF er staan al auto's van baan 2 (beneden) of 4 op de kruising rem je af
   ; als er geen auto's op de kruising staan van baan 2 of 4, maar wel een auto van baan 3 (links) rij je door. OOK AL STAAT ER EEN AUTO OP BAAN 4
@@ -246,7 +247,7 @@ end
 
 to slow-down [car-infront]
   ; versloom de auto op basis van de auto voor je en de descelaration
-  set speed [speed] of car-infront - descelaration
+  set speed [speed] of car-infront - decelaration
 end
 
 
@@ -258,7 +259,7 @@ end
 
 to-report get-att-vals
   ;; elke variabelen die je in het bestand wilt meegeven
-  report (list average line_1 total_amount_cars speed-limit accelaration descelaration)
+  report (list average line_1 total_amount_cars speed-limit accelaration decelaration)
 end
 
 
@@ -266,7 +267,7 @@ to results
   file-open "data_verkeer.csv"
   if (not file-exists? "data_verkeer.csv") [
     ;; voegt kolomnamen toe aan bestand
-    file-print csv:to-row (list "average speed" "line count" "total cars" "speed limit" "accelaration" "descelaration")
+    file-print csv:to-row (list "average speed" "line count" "total cars" "speed limit" "accelaration" "decelaration")
   ]
   ask one-of cars [
     file-print csv:to-row get-att-vals
@@ -277,7 +278,7 @@ end
 
 to deleteFile
   if (file-exists? "data_verkeer.csv") [
-    ifelse (user-yes-or-no? "Ok to delete file?") [
+    ifelse (user-yes-or-no? "Do you want to delete this file?") [ ;;vraagt aan user om confirmatie om de file te deleten
       file-delete "data_verkeer.csv"
     ][
     ]
@@ -412,8 +413,8 @@ SLIDER
 513
 471
 546
-descelaration
-descelaration
+decelaration
+decelaration
 0.001
 0.1
 0.055
