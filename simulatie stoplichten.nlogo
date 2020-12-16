@@ -1,12 +1,15 @@
-extensions [table array]
+extensions [csv]
+
 breed [cars car]
 
 globals [  line_1 line_2 line_3 line_4
+  average
   time
   flow-car-way-1 flow-car-way-2 flow-car-way-3 flow-car-way-4
   flow-car-way-5 flow-car-way-6 flow-car-way-7 flow-car-way-8
   color_1 color_2
-  switch-checked]
+  switch-checked
+  total_amount_cars]
 
 cars-own [
   speed
@@ -47,8 +50,8 @@ to set_traffic_lights
 end
 
 to check
-  if ticks mod 100 = 0 [ set color_1 lime set color_2 red]
-  if ticks mod 200 = 0 [ set color_1 red set color_2 lime ]
+  if ticks mod 200 = 0 [ set color_1 lime set color_2 red]
+  if ticks mod 400 = 0 [ set color_1 red set color_2 lime ]
   set_traffic_lights
 end
 
@@ -68,7 +71,8 @@ to make-cars [ amount road-num]
     if road-num = 3 [ setxy random-xcor -1 ]
     if road-num = 4 [ setxy 1 random-ycor ]
     set speed 0
-    set speed-limit 0.7;; door de waarde bij de auto te zetten krijgt de weg een maximum snelheid
+    set speed-limit 0.6;; door de waarde bij de auto te zetten krijgt de weg een maximum snelheid
+    set total_amount_cars count cars
     seperate
   ]
 end
@@ -158,9 +162,13 @@ to go
     if speed < 0 [ set speed 0 ]
     fd speed
   ]
+  set average mean [speed] of cars
   ifelse traffic-lights = True
   [ line_crosses_count lime ]
   [ line_crosses_count gray ]
+
+  if ticks mod 1000 = 0 [results]
+
   tick
 end
 
@@ -206,6 +214,35 @@ end
 
 to speed-up []
   set speed speed + accelaration
+end
+
+
+to-report get-att-vals
+  ;; elke variabelen die je in het bestand wilt meegeven
+  report (list average line_1 total_amount_cars speed-limit accelaration descelaration)
+end
+
+
+to results
+  file-open "data_verkeer.csv"
+  if (not file-exists? "data_verkeer.csv") [
+    ;; voegt kolomnamen toe aan bestand
+    file-print csv:to-row (list "average speed" "line count" "total cars" "speed limit" "accelaration" "descelaration")
+  ]
+  ask one-of cars [
+    file-print csv:to-row get-att-vals
+  ]
+  file-close
+end
+
+
+to deleteFile
+  if (file-exists? "data_verkeer.csv") [
+    ifelse (user-yes-or-no? "Ok to delete file?") [
+      file-delete "data_verkeer.csv"
+    ][
+    ]
+  ]
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -295,7 +332,7 @@ amount-cars-way-1
 amount-cars-way-1
 1
 20
-1.0
+6.0
 1
 1
 NIL
@@ -310,7 +347,7 @@ amount-cars-way-2
 amount-cars-way-2
 1
 20
-1.0
+6.0
 1
 1
 NIL
@@ -324,8 +361,8 @@ SLIDER
 accelaration
 accelaration
 0.0001
-0.03
-0.0049
+0.02
+0.0056
 0.0001
 1
 NIL
@@ -355,7 +392,7 @@ amount-cars-way-3
 amount-cars-way-3
 1
 20
-1.0
+6.0
 1
 1
 NIL
@@ -370,7 +407,7 @@ amount-cars-way-4
 amount-cars-way-4
 1
 20
-1.0
+6.0
 1
 1
 NIL
@@ -401,9 +438,43 @@ SWITCH
 186
 traffic-lights
 traffic-lights
-0
+1
 1
 -1000
+
+BUTTON
+185
+189
+270
+222
+NIL
+results
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+202
+230
+287
+263
+NIL
+deleteFile
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
 
 @#$#@#$#@
 ## WHAT IS IT?
