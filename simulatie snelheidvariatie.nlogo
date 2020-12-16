@@ -14,6 +14,7 @@ to setup-highway
   set average_1 0
   set average_2 0
   ask patches [ create-highway ]
+  ;; 2 wegen
   make-cars amount-cars-way-1 1
   make-cars amount-cars-way-2 2
   set flow-car-way-1 one-of cars with [ number = 1 ]
@@ -50,31 +51,31 @@ end
 
 to line_1_count
   ask flow-car-way-1 [
-    if ([pcolor] of patch-here = gray) [ set line_1 line_1 + (speed * 1) ]
+    if ([pcolor] of patch-here = gray) [ set line_1 line_1 + 1 ]
   ]
 end
 
 to line_2_count
   ask flow-car-way-2 [
-    if ([pcolor] of patch-here = gray) [ set line_2 line_2 + (speed * 1) ]
+    if ([pcolor] of patch-here = gray) [ set line_2 line_2 + 1 ]
   ]
 end
 
 to jam_way_1
+  ; verlaag de snelheid van 1 auto op baan 1 om een file te veroorzaken
   ask one-of cars with [number = 1] [
     set speed speed * 0.5
   ]
 end
 
 to jam_way_2
+ ; verlaag de snelheid van 1 auto op baan 2 om een file te veroorzaken
     ask one-of cars with [number = 2] [
     set speed speed * 0.5
   ]
 end
 
 to go
-  ;; sorteer de auto volgorde
-  let sorter sort-on [ xcor ] cars
   ask cars[
     ;; is er een auto 2 patches voor je
     let car-infront one-of cars-on patch-ahead 2
@@ -99,11 +100,13 @@ to slow-down [car-infront]
   ;; kans p dat een auto versloomt (treuzelen)..90% kans
   let chance random 100 + 1
   if chance < 90 [
+    ; versloom een auto op basis van de auto voor hem en de decelaration
     set speed [speed] of car-infront - decelaration
   ]
 end
 
 to speed-up []
+  ; versnel een auto op basis van de speed en de acceleration
   set speed speed + acceleration
 end
 @#$#@#$#@
@@ -231,14 +234,14 @@ acceleration
 acceleration
 0.0001
 0.01
-0.0045
+0.006
 0.0001
 1
 NIL
 HORIZONTAL
 
 PLOT
-151
+261
 13
 663
 222
@@ -248,13 +251,13 @@ speed
 0.0
 0.001
 0.0
-1.0
+1.1
 true
 true
 "" ""
 PENS
-"way 50 km/h" 1.0 0 -2674135 true "" "plot mean [speed] of cars with [ number = 1 ]"
-"way 100 km/h" 1.0 0 -13345367 true "" "plot mean [speed] of cars with [ number = 2 ]"
+"way 1" 1.0 0 -2674135 true "" "plot mean [speed] of cars with [ number = 1 ]"
+"way 2" 1.0 0 -13345367 true "" "plot mean [speed] of cars with [ number = 2 ]"
 
 SLIDER
 70
@@ -321,7 +324,7 @@ NIL
 0
 
 PLOT
-1134
+1193
 10
 1572
 221
@@ -336,8 +339,8 @@ true
 true
 "" ""
 PENS
-"way 50 km/h" 1.0 0 -2674135 true "" "plot line_1"
-"way 100 km/h" 1.0 0 -13345367 true "" "plot line_2"
+"way 1" 1.0 0 -2674135 true "" "plot line_1"
+"way 2" 1.0 0 -13345367 true "" "plot line_2"
 
 @#$#@#$#@
 ## WHAT IS IT?
