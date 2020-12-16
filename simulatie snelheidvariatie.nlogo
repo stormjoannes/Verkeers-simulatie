@@ -50,13 +50,13 @@ end
 
 to line_1_count
   ask flow-car-way-1 [
-    if ([pcolor] of patch-here = gray) [ set line_1 line_1 + 1 ]
+    if ([pcolor] of patch-here = gray) [ set line_1 line_1 + (speed * 1) ]
   ]
 end
 
 to line_2_count
   ask flow-car-way-2 [
-    if ([pcolor] of patch-here = gray) [ set line_2 line_2 + 1 ]
+    if ([pcolor] of patch-here = gray) [ set line_2 line_2 + (speed * 1) ]
   ]
 end
 
@@ -231,14 +231,14 @@ acceleration
 acceleration
 0.0001
 0.01
-0.006
+0.0045
 0.0001
 1
 NIL
 HORIZONTAL
 
 PLOT
-261
+151
 13
 663
 222
@@ -248,13 +248,13 @@ speed
 0.0
 0.001
 0.0
-1.1
+1.0
 true
 true
 "" ""
 PENS
-"way 1" 1.0 0 -2674135 true "" "plot mean [speed] of cars with [ number = 1 ]"
-"way 2" 1.0 0 -13345367 true "" "plot mean [speed] of cars with [ number = 2 ]"
+"way 50 km/h" 1.0 0 -2674135 true "" "plot mean [speed] of cars with [ number = 1 ]"
+"way 100 km/h" 1.0 0 -13345367 true "" "plot mean [speed] of cars with [ number = 2 ]"
 
 SLIDER
 70
@@ -321,7 +321,7 @@ NIL
 0
 
 PLOT
-1193
+1134
 10
 1572
 221
@@ -336,8 +336,8 @@ true
 true
 "" ""
 PENS
-"way 1" 1.0 0 -2674135 true "" "plot line_1"
-"way 2" 1.0 0 -13345367 true "" "plot line_2"
+"way 50 km/h" 1.0 0 -2674135 true "" "plot line_1"
+"way 100 km/h" 1.0 0 -13345367 true "" "plot line_2"
 
 @#$#@#$#@
 ## WHAT IS IT?
