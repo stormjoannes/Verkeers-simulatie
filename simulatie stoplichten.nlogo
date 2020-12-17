@@ -257,7 +257,7 @@ to speed-up []
 end
 
 
-to-report get-att-vals
+to-report var-in-file
   ;; elke variabelen die je in het bestand wilt meegeven
   report (list average line_1 total_amount_cars speed-limit accelaration decelaration)
 end
@@ -270,7 +270,7 @@ to results
     file-print csv:to-row (list "average speed" "line count" "total cars" "speed limit" "accelaration" "decelaration")
   ]
   ask one-of cars [
-    file-print csv:to-row get-att-vals
+    file-print csv:to-row var-in-file
   ]
   file-close
 end
