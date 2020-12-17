@@ -51,13 +51,13 @@ end
 
 to line_1_count
   ask flow-car-way-1 [
-    if ([pcolor] of patch-here = gray) [ set line_1 line_1 + 1 ]
+    if ([pcolor] of patch-here = gray) [ set line_1 line_1 + speed ]
   ]
 end
 
 to line_2_count
   ask flow-car-way-2 [
-    if ([pcolor] of patch-here = gray) [ set line_2 line_2 + 1 ]
+    if ([pcolor] of patch-here = gray) [ set line_2 line_2 + speed ]
   ]
 end
 

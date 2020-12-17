@@ -96,16 +96,16 @@ to line_crosses_count [ line_check_color ]
   ; dit word berekend door de al berekende doorstroom plus de huidige speed wanneer de auto over een uitgekozen patch rijd.
   ; deze patch is als de stoplichten aan staan de lime kleurige patch, anders is het de grijzen.
   ask flow-car-way-1 [
-    if ([pcolor] of patch-here = line_check_color) [ set line_1 line_1 + (speed * 1) ]
+    if ([pcolor] of patch-here = line_check_color) [ set line_1 line_1 + speed ]
   ]
   ask flow-car-way-2 [
-    if ([pcolor] of patch-here = line_check_color) [ set line_2 line_2 + (speed * 1) ]
+    if ([pcolor] of patch-here = line_check_color) [ set line_2 line_2 + speed ]
   ]
   ask flow-car-way-3 [
-    if ([pcolor] of patch-here = line_check_color) [ set line_3 line_3 + (speed * 1) ]
+    if ([pcolor] of patch-here = line_check_color) [ set line_3 line_3 + speed ]
   ]
   ask flow-car-way-4 [
-    if ([pcolor] of patch-here = line_check_color) [ set line_4 line_4 + (speed * 1) ]
+    if ([pcolor] of patch-here = line_check_color) [ set line_4 line_4 + speed ]
   ]
 end
 
